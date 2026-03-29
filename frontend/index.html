@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Dashboard</title>
+    
+    <!-- Semantic CSS Variables - Theme Foundation -->
+    <style id="theme-variables">
+        :root {
+            /* Semantic Color Tokens */
+            --color-bg-primary: var(--theme-bg-primary, #1a1a2e);
+            --color-bg-secondary: var(--theme-bg-secondary, #16213e);
+            --color-bg-tertiary: var(--theme-bg-tertiary, #0f0f23);
+            --color-bg-card: var(--theme-bg-card, #1f1f3a);
+            --color-bg-hover: var(--theme-bg-hover, #2a2a4a);
+            
+            --color-text-primary: var(--theme-text-primary, #eaeaea);
+            --color-text-secondary: var(--theme-text-secondary, #a0a0a0);
+            --color-text-muted: var(--theme-text-muted, #606060);
+            
+            --color-accent-primary: var(--theme-accent, #00d9ff);
+            --color-accent-secondary: var(--theme-accent-secondary, #ff6b6b);
+            
+            --color-status-ok: var(--theme-status-ok, #00ff88);
+            --color-status-warn: var(--theme-status-warn, #ffaa00);
+            --color-status-error: var(--theme-status-error, #ff4444);
+            
+            --color-border: var(--theme-border, #333355);
+            --color-border-focus: var(--theme-border-focus, #00d9ff);
+            
+            /* Typography */
+            --font-family: var(--theme-font, 'Inter', system-ui, sans-serif);
+            --font-mono: var(--theme-font-mono, 'JetBrains Mono', monospace);
+            --font-size-base: var(--theme-font-size, 14px);
+            
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            
+            /* Border Radius */
+            --radius-sm: var(--theme-radius-sm, 4px);
+            --radius-md: var(--theme-radius-md, 8px);
+            --radius-lg: var(--theme-radius-lg, 12px);
+            
+            /* Shadows */
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.2);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
+            
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-normal: 250ms ease;
+        }
+    </style>
+    
+    <!-- Base Styles -->
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        html {
+            font-size: var(--font-size-base);
+        }
+        
+        body {
+            font-family: var(--font-family);
+            background-color: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+        
+        /* ================================================================
+           Layout
+           ================================================================ */
+        
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-lg);
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--color-border);
+            margin-bottom: var(--space-lg);
+        }
+        
+        .header__title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .header__actions {
+            display: flex;
+            gap: var(--space-sm);
+        }
+        
+        /* ================================================================
+           Grid Layout
+           ================================================================ */
+        
+        .link-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--space-md);
+        }
+        
+        /* ================================================================
+           Link Card - Core Component
+           ================================================================ */
+        
+        .link-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            transition: transform var(--transition-fast), 
+                        box-shadow var(--transition-fast),
+                        border-color var(--transition-fast);
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .link-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--color-accent-primary);
+        }
+        
+        .link-card__header {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+        }
+        
+        .link-card__icon {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            object-fit: contain;
+            background: var(--color-bg-secondary);
+            padding: 4px;
+        }
+        
+        .link-card__icon--fallback {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+        }
+        
+        .link-card__info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .link-card__title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--color-text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .link-card__url {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .link-card__status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        .link-card__status--ok {
+            background: var(--color-status-ok);
+            box-shadow: 0 0 8px var(--color-status-ok);
+        }
+        
+        .link-card__status--warn {
+            background: var(--color-status-warn);
+            box-shadow: 0 0 8px var(--color-status-warn);
+        }
+        
+        .link-card__status--error {
+            background: var(--color-status-error);
+            box-shadow: 0 0 8px var(--color-status-error);
+        }
+        
+        .link-card__status--unknown {
+            background: var(--color-text-muted);
+        }
+        
+        .link-card__actions {
+            position: absolute;
+            top: var(--space-sm);
+            right: var(--space-sm);
+            display: flex;
+            gap: var(--space-xs);
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+        
+        .link-card:hover .link-card__actions {
+            opacity: 1;
+        }
+        
+        /* ================================================================
+           Action Button
+           ================================================================ */
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-xs);
+            padding: var(--space-sm) var(--space-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-family: inherit;
+        }
+        
+        .btn--primary {
+            background: var(--color-accent-primary);
+            color: var(--color-bg-primary);
+        }
+        
+        .btn--primary:hover {
+            filter: brightness(1.1);
+        }
+        
+        .btn--secondary {
+            background: transparent;
+            color: var(--color-text-primary);
+            border-color: var(--color-border);
+        }
+        
+        .btn--secondary:hover {
+            background: var(--color-bg-hover);
+            border-color: var(--color-accent-primary);
+        }
+        
+        .btn--icon {
+            padding: var(--space-xs);
+            width: 32px;
+            height: 32px;
+        }
+        
+        .btn--ghost {
+            background: transparent;
+            color: var(--color-text-secondary);
+            border: none;
+        }
+        
+        .btn--ghost:hover {
+            color: var(--color-accent-primary);
+            background: var(--color-bg-hover);
+        }
+        
+        /* ================================================================
+           Modal
+           ================================================================ */
+        
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-normal), visibility var(--transition-normal);
+        }
+        
+        .modal-overlay--open {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform var(--transition-normal);
+        }
+        
+        .modal-overlay--open .modal {
+            transform: scale(1);
+        }
+        
+        .modal__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .modal__title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .modal__close {
+            background: none;
+            border: none;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            padding: var(--space-xs);
+        }
+        
+        .modal__close:hover {
+            color: var(--color-text-primary);
+        }
+        
+        /* ================================================================
+           Form Elements
+           ================================================================ */
+        
+        .form-group {
+            margin-bottom: var(--space-md);
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-xs);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--color-bg-tertiary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            color: var(--color-text-primary);
+            font-size: 0.875rem;
+            font-family: inherit;
+            transition: border-color var(--transition-fast);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-border-focus);
+        }
+        
+        .form-input::placeholder {
+            color: var(--color-text-muted);
+        }
+        
+        /* ================================================================
+           Theme Selector
+           ================================================================ */
+        
+        .theme-selector {
+            position: relative;
+        }
+        
+        .theme-selector__btn {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: var(--color-bg-tertiary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            color: var(--color-text-primary);
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        
+        .theme-selector__dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: var(--space-xs);
+            background: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            min-width: 200px;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all var(--transition-fast);
+        }
+        
+        .theme-selector__dropdown--open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .theme-selector__option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+        
+        .theme-selector__option:hover {
+            background: var(--color-bg-hover);
+        }
+        
+        .theme-selector__option--active {
+            background: var(--color-bg-hover);
+            color: var(--color-accent-primary);
+        }
+        
+        .theme-selector__swatch {
+            width: 20px;
+            height: 20px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--color-border);
+        }
+        
+        /* ================================================================
+           Detail Panel (for change log)
+           ================================================================ */
+        
+        .detail-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 400px;
+            max-width: 100%;
+            height: 100vh;
+            background: var(--color-bg-secondary);
+            border-left: 1px solid var(--color-border);
+            transform: translateX(100%);
+            transition: transform var(--transition-normal);
+            z-index: 900;
+            overflow-y: auto;
+        }
+        
+        .detail-panel--open {
+            transform: translateX(0);
+        }
+        
+        .detail-panel__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-md);
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .detail-panel__title {
+            font-weight: 600;
+        }
+        
+        .detail-panel__content {
+            padding: var(--space-md);
+        }
+        
+        .detail-section {
+            margin-bottom: var(--space-lg);
+        }
+        
+        .detail-section__title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-text-muted);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: var(--space-xs) 0;
+            border-bottom: 1px solid var(--color-border);
+            font-size: 0.875rem;
+        }
+        
+        .detail-item__label {
+            color: var(--color-text-secondary);
+        }
+        
+        .detail-item__value {
+            color: var(--color-text-primary);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+        
+        /* Change Log */
+        
+        .change-log {
+            list-style: none;
+        }
+        
+        .change-log__item {
+            background: var(--color-bg-tertiary);
+            border-radius: var(--radius-sm);
+            padding: var(--space-sm);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .change-log__item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .change-log__type {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+            background: var(--color-accent-primary);
+            color: var(--color-bg-primary);
+        }
+        
+        .change-log__time {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+        
+        .change-log__diff {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--color-text-secondary);
+        }
+        
+        .change-log__empty {
+            color: var(--color-text-muted);
+            font-style: italic;
+        }
+        
+        /* ================================================================
+           Empty State
+           ================================================================ */
+        
+        .empty-state {
+            text-align: center;
+            padding: var(--space-xl);
+            color: var(--color-text-muted);
+        }
+        
+        .empty-state__icon {
+            font-size: 3rem;
+            margin-bottom: var(--space-md);
+        }
+        
+        .empty-state__title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+        }
+        
+        /* ================================================================
+           Utility Classes
+           ================================================================ */
+        
+        .text-ok { color: var(--color-status-ok); }
+        .text-warn { color: var(--color-status-warn); }
+        .text-error { color: var(--color-status-error); }
+        .text-muted { color: var(--color-text-muted); }
+        
+        /* SVG Icons (inline) */
+        .icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+        
+        .icon--sm { width: 12px; height: 12px; }
+        .icon--lg { width: 24px; height: 24px; }
+    </style>
+    
+    <!-- Theme Definitions -->
+    <style id="theme-definitions">
+        /* Default Dark Theme */
+        [data-theme="dark"] {
+            --theme-bg-primary: #1a1a2e;
+            --theme-bg-secondary: #16213e;
+            --theme-bg-tertiary: #0f0f23;
+            --theme-bg-card: #1f1f3a;
+            --theme-bg-hover: #2a2a4a;
+            
+            --theme-text-primary: #eaeaea;
+            --theme-text-secondary: #a0a0a0;
+            --theme-text-muted: #606060;
+            
+            --theme-accent: #00d9ff;
+            --theme-accent-secondary: #ff6b6b;
+            
+            --theme-status-ok: #00ff88;
+            --theme-status-warn: #ffaa00;
+            --theme-status-error: #ff4444;
+            
+            --theme-border: #333355;
+            --theme-border-focus: #00d9ff;
+            
+            --theme-font: 'Inter', system-ui, sans-serif;
+            --theme-radius-sm: 4px;
+            --theme-radius-md: 8px;
+            --theme-radius-lg: 12px;
+        }
+        
+        /* Light Theme */
+        [data-theme="light"] {
+            --theme-bg-primary: #f5f5f5;
+            --theme-bg-secondary: #ffffff;
+            --theme-bg-tertiary: #ebebeb;
+            --theme-bg-card: #ffffff;
+            --theme-bg-hover: #e8e8e8;
+            
+            --theme-text-primary: #1a1a1a;
+            --theme-text-secondary: #666666;
+            --theme-text-muted: #999999;
+            
+            --theme-accent: #0066cc;
+            --theme-accent-secondary: #cc4400;
+            
+            --theme-status-ok: #00aa44;
+            --theme-status-warn: #cc8800;
+            --theme-status-error: #cc0000;
+            
+            --theme-border: #dddddd;
+            --theme-border-focus: #0066cc;
+            
+            --theme-radius-sm: 4px;
+            --theme-radius-md: 8px;
+            --theme-radius-lg: 12px;
+        }
+        
+        /* Cyberpunk Theme */
+        [data-theme="cyberpunk"] {
+            --theme-bg-primary: #0d0221;
+            --theme-bg-secondary: #150a3d;
+            --theme-bg-tertiary: #0a0118;
+            --theme-bg-card: #1a0a3d;
+            --theme-bg-hover: #2a1a5d;
+            
+            --theme-text-primary: #ff00ff;
+            --theme-text-secondary: #ff66ff;
+            --theme-text-muted: #990099;
+            
+            --theme-accent: #00ffff;
+            --theme-accent-secondary: #ff00ff;
+            
+            --theme-status-ok: #00ff00;
+            --theme-status-warn: #ffff00;
+            --theme-status-error: #ff0000;
+            
+            --theme-border: #ff00ff;
+            --theme-border-focus: #00ffff;
+            
+            --theme-font: 'JetBrains Mono', monospace;
+            --theme-radius-sm: 0px;
+            --theme-radius-md: 0px;
+            --theme-radius-lg: 0px;
+        }
+        
+        /* Matrix Theme */
+        [data-theme="matrix"] {
+            --theme-bg-primary: #000000;
+            --theme-bg-secondary: #001100;
+            --theme-bg-tertiary: #000800;
+            --theme-bg-card: #001100;
+            --theme-bg-hover: #002200;
+            
+            --theme-text-primary: #00ff00;
+            --theme-text-secondary: #00cc00;
+            --theme-text-muted: #006600;
+            
+            --theme-accent: #00ff00;
+            --theme-accent-secondary: #00cc00;
+            
+            --theme-status-ok: #00ff00;
+            --theme-status-warn: #88ff00;
+            --theme-status-error: #ff0000;
+            
+            --theme-border: #003300;
+            --theme-border-focus: #00ff00;
+            
+            --theme-font: 'JetBrains Mono', monospace;
+            --theme-radius-sm: 0px;
+            --theme-radius-md: 0px;
+            --theme-radius-lg: 0px;
+        }
+        
+        /* Nordic Theme */
+        [data-theme="nordic"] {
+            --theme-bg-primary: #2e3440;
+            --theme-bg-secondary: #3b4252;
+            --theme-bg-tertiary: #252a36;
+            --theme-bg-card: #3b4252;
+            --theme-bg-hover: #4c566a;
+            
+            --theme-text-primary: #eceff4;
+            --theme-text-secondary: #d8dee9;
+            --theme-text-muted: #81909e;
+            
+            --theme-accent: #88c0d0;
+            --theme-accent-secondary: #bf616a;
+            
+            --theme-status-ok: #a3be8c;
+            --theme-status-warn: #ebcb8b;
+            --theme-status-error: #bf616a;
+            
+            --theme-border: #4c566a;
+            --theme-border-focus: #88c0d0;
+            
+            --theme-font: 'Inter', system-ui, sans-serif;
+            --theme-radius-sm: 4px;
+            --theme-radius-md: 6px;
+            --theme-radius-lg: 8px;
+        }
+        
+        /* Monokai Theme */
+        [data-theme="monokai"] {
+            --theme-bg-primary: #272822;
+            --theme-bg-secondary: #1e1f1c;
+            --theme-bg-tertiary: #1a1b17;
+            --theme-bg-card: #2d2e2a;
+            --theme-bg-hover: #3e3d32;
+            
+            --theme-text-primary: #f8f8f2;
+            --theme-text-secondary: #cfcfc2;
+            --theme-text-muted: #75715e;
+            
+            --theme-accent: #66d9ef;
+            --theme-accent-secondary: #f92672;
+            
+            --theme-status-ok: #a6e22e;
+            --theme-status-warn: #e6db74;
+            --theme-status-error: #f92672;
+            
+            --theme-border: #49483e;
+            --theme-border-focus: #66d9ef;
+            
+            --theme-font: 'Inter', system-ui, sans-serif;
+            --theme-radius-sm: 0px;
+            --theme-radius-md: 0px;
+            --theme-radius-lg: 0px;
+        }
+        
+        /* Solarized Dark */
+        [data-theme="solarized-dark"] {
+            --theme-bg-primary: #002b36;
+            --theme-bg-secondary: #073642;
+            --theme-bg-tertiary: #001e27;
+            --theme-bg-card: #073642;
+            --theme-bg-hover: #094856;
+            
+            --theme-text-primary: #839496;
+            --theme-text-secondary: #93a1a1;
+            --theme-text-muted: #586e75;
+            
+            --theme-accent: #268bd2;
+            --theme-accent-secondary: #cb4b16;
+            
+            --theme-status-ok: #859900;
+            --theme-status-warn: #b58900;
+            --theme-status-error: #dc322f;
+            
+            --theme-border: #094856;
+            --theme-border-focus: #268bd2;
+            
+            --theme-font: 'Inter', system-ui, sans-serif;
+            --theme-radius-sm: 2px;
+            --theme-radius-md: 4px;
+            --theme-radius-lg: 6px;
+        }
+        
+        /* Dracula Theme */
+        [data-theme="dracula"] {
+            --theme-bg-primary: #282a36;
+            --theme-bg-secondary: #21222c;
+            --theme-bg-tertiary: #1e1f29;
+            --theme-bg-card: #2d2d3d;
+            --theme-bg-hover: #383a4a;
+            
+            --theme-text-primary: #f8f8f2;
+            --theme-text-secondary: #e6e6e6;
+            --theme-text-muted: #6272a4;
+            
+            --theme-accent: #bd93f9;
+            --theme-accent-secondary: #ff79c6;
+            
+            --theme-status-ok: #50fa7b;
+            --theme-status-warn: #f1fa8c;
+            --theme-status-error: #ff5555;
+            
+            --theme-border: #44475a;
+            --theme-border-focus: #bd93f9;
+            
+            --theme-font: 'Inter', system-ui, sans-serif;
+            --theme-radius-sm: 4px;
+            --theme-radius-md: 6px;
+            --theme-radius-lg: 8px;
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="header__title">Link Dashboard</h1>
+            <div class="header__actions">
+                <button class="btn btn--primary" id="addLinkBtn">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    Add Link
+                </button>
+                
+                <!-- Theme Selector -->
+                <div class="theme-selector">
+                    <button class="theme-selector__btn" id="themeBtn">
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                        <span id="currentTheme">Dark</span>
+                    </button>
+                    <div class="theme-selector__dropdown" id="themeDropdown">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main>
+            <div class="link-grid" id="linkGrid">
+                <!-- Links populated by JS -->
+            </div>
+            
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <div class="empty-state__icon">🔗</div>
+                <div class="empty-state__title">No links yet</div>
+                <p>Add your first link to start monitoring</p>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Add Link Modal -->
+    <div class="modal-overlay" id="addLinkModal">
+        <div class="modal">
+            <div class="modal__header">
+                <h2 class="modal__title">Add New Link</h2>
+                <button class="modal__close" id="closeAddModal">
+                    <svg class="icon icon--lg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </button>
+            </div>
+            <form id="addLinkForm">
+                <div class="form-group">
+                    <label class="form-label" for="linkUrl">URL *</label>
+                    <input type="url" class="form-input" id="linkUrl" placeholder="https://example.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="linkPort">Port</label>
+                    <input type="number" class="form-input" id="linkPort" placeholder="443" value="443">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="linkTitle">Title (optional)</label>
+                    <input type="text" class="form-input" id="linkTitle" placeholder="My Website">
+                </div>
+                <button type="submit" class="btn btn--primary">Add Link</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Detail Panel -->
+    <div class="detail-panel" id="detailPanel">
+        <div class="detail-panel__header">
+            <span class="detail-panel__title">Link Details</span>
+            <button class="btn btn--ghost btn--icon" id="closeDetailPanel">
+                <svg class="icon icon--lg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
+        </div>
+        <div class="detail-panel__content" id="detailContent">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script>
+        // =================================================================
+        // Configuration
+        // =================================================================
+        
+        const API_BASE = 'http://127.0.0.1:8080/api';
+        
+        // Theme definitions
+        const THEMES = [
+            { id: 'dark', name: 'Dark', colors: ['#1a1a2e', '#00d9ff', '#eaeaea'] },
+            { id: 'light', name: 'Light', colors: ['#f5f5f5', '#0066cc', '#1a1a1a'] },
+            { id: 'cyberpunk', name: 'Cyberpunk', colors: ['#0d0221', '#00ffff', '#ff00ff'] },
+            { id: 'matrix', name: 'Matrix', colors: ['#000000', '#00ff00', '#00ff00'] },
+            { id: 'nordic', name: 'Nordic', colors: ['#2e3440', '#88c0d0', '#eceff4'] },
+            { id: 'monokai', name: 'Monokai', colors: ['#272822', '#66d9ef', '#f8f8f2'] },
+            { id: 'solarized-dark', name: 'Solarized Dark', colors: ['#002b36', '#268bd2', '#839496'] },
+            { id: 'dracula', name: 'Dracula', colors: ['#282a36', '#bd93f9', '#f8f8f2'] },
+        ];
+        
+        // =================================================================
+        // State
+        // =================================================================
+        
+        let links = [];
+        let currentLinkId = null;
+        let currentTheme = localStorage.getItem('linkdashboard-theme') || 'dark';
+        
+        // =================================================================
+        // Theme System
+        // =================================================================
+        
+        function initTheme() {
+            // Set initial theme
+            document.body.dataset.theme = currentTheme;
+            renderThemeDropdown();
+            
+            // Load custom themes from localStorage
+            const customThemes = JSON.parse(localStorage.getItem('linkdashboard-custom-themes') || '[]');
+            
+            // Apply any custom theme CSS variables
+            applyCustomThemes(customThemes);
+        }
+        
+        function applyCustomThemes(customThemes) {
+            let styleEl = document.getElementById('custom-themes');
+            if (!styleEl) {
+                styleEl = document.createElement('style');
+                styleEl.id = 'custom-themes';
+                document.head.appendChild(styleEl);
+            }
+            
+            let css = '';
+            customThemes.forEach(theme => {
+                css += `
+                    [data-theme="${theme.id}"] {
+                        ${Object.entries(theme.variables).map(([k, v]) => `--theme-${k.replace(/_/g, '-')}: ${v}`).join('; ')}
+                    }
+                `;
+            });
+            styleEl.textContent = css;
+        }
+        
+        function renderThemeDropdown() {
+            const dropdown = document.getElementById('themeDropdown');
+            const customThemes = JSON.parse(localStorage.getItem('linkdashboard-custom-themes') || '[]');
+            const allThemes = [...THEMES, ...customThemes];
+            
+            dropdown.innerHTML = allThemes.map(theme => `
+                <div class="theme-selector__option ${theme.id === currentTheme ? 'theme-selector__option--active' : ''}" 
+                     data-theme-id="${theme.id}">
+                    <div class="theme-selector__swatch" style="background: linear-gradient(135deg, ${theme.colors[0]} 50%, ${theme.colors[1]} 50%)"></div>
+                    <span>${theme.name}</span>
+                </div>
+            `).join('');
+            
+            // Update button text
+            const themeName = allThemes.find(t => t.id === currentTheme)?.name || 'Dark';
+            document.getElementById('currentTheme').textContent = themeName;
+        }
+        
+        function setTheme(themeId) {
+            currentTheme = themeId;
+            document.body.dataset.theme = themeId;
+            localStorage.setItem('linkdashboard-theme', themeId);
+            renderThemeDropdown();
+        }
+        
+        // Theme selector toggle
+        document.getElementById('themeBtn').addEventListener('click', () => {
+            document.getElementById('themeDropdown').classList.toggle('theme-selector__dropdown--open');
+        });
+        
+        document.getElementById('themeDropdown').addEventListener('click', (e) => {
+            const option = e.target.closest('.theme-selector__option');
+            if (option) {
+                setTheme(option.dataset.themeId);
+                document.getElementById('themeDropdown').classList.remove('theme-selector__dropdown--open');
+            }
+        });
+        
+        // Close dropdown on outside click
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.theme-selector')) {
+                document.getElementById('themeDropdown').classList.remove('theme-selector__dropdown--open');
+            }
+        });
+        
+        // =================================================================
+        // Link Card Rendering
+        // =================================================================
+        
+        function getFaviconUrl(url) {
+            try {
+                const domain = new URL(url).hostname;
+                return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+            } catch {
+                return null;
+            }
+        }
+        
+        function getStatusClass(status) {
+            switch (status) {
+                case 'ok': return 'link-card__status--ok';
+                case 'warn': return 'link-card__status--warn';
+                case 'error': return 'link-card__status--error';
+                default: return 'link-card__status--unknown';
+            }
+        }
+        
+        function renderLinks() {
+            const grid = document.getElementById('linkGrid');
+            const empty = document.getElementById('emptyState');
+            
+            if (links.length === 0) {
+                grid.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            
+            empty.style.display = 'none';
+            grid.innerHTML = links.map(link => `
+                <div class="link-card" data-link-id="${link.id}">
+                    <div class="link-card__actions">
+                        <button class="btn btn--ghost btn--icon" title="Details" onclick="openDetailPanel('${link.id}'); event.stopPropagation();">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                        </button>
+                    </div>
+                    <div class="link-card__header">
+                        <img class="link-card__icon" src="${getFaviconUrl(link.url)}" 
+                             onerror="this.style.display='none'" alt="">
+                        <div class="link-card__info">
+                            <div class="link-card__title">${link.title || new URL(link.url).hostname}</div>
+                            <div class="link-card__url">${link.url}</div>
+                        </div>
+                        <div class="link-card__status ${getStatusClass(link.status)}" title="${link.status || 'unknown'}"></div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add click handlers for opening links
+            grid.querySelectorAll('.link-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (!e.target.closest('.link-card__actions')) {
+                        const linkData = links.find(l => l.id === card.dataset.linkId);
+                        if (linkData) {
+                            window.open(linkData.url, '_blank');
+                        }
+                    }
+                });
+            });
+        }
+        
+        // =================================================================
+        // Detail Panel
+        // =================================================================
+        
+        async function openDetailPanel(linkId) {
+            currentLinkId = linkId;
+            const link = links.find(l => l.id === linkId);
+            const content = document.getElementById('detailContent');
+            
+            // Show loading
+            content.innerHTML = '<p class="text-muted">Loading...</p>';
+            document.getElementById('detailPanel').classList.add('detail-panel--open');
+            
+            try {
+                // Fetch link details and check result
+                const [linkRes, checkRes, changesRes] = await Promise.all([
+                    fetch(`${API_BASE}/links/${linkId}`),
+                    fetch(`${API_BASE}/links/${linkId}/check`),
+                    fetch(`${API_BASE}/links/${linkId}/changes`)
+                ]);
+                
+                const linkData = await linkRes.json();
+                const checkData = await checkRes.json();
+                const changesData = await changesRes.json();
+                
+                const check = checkData.check_result || {};
+                const statusClass = checkData.status === 'ok' ? 'text-ok' : 
+                                   checkData.status === 'warn' ? 'text-warn' : 'text-error';
+                
+                content.innerHTML = `
+                    <div class="detail-section">
+                        <div class="detail-section__title">Status</div>
+                        <div class="detail-item">
+                            <span class="detail-item__label">Current Status</span>
+                            <span class="detail-item__value ${statusClass}">${checkData.status?.toUpperCase() || 'UNKNOWN'}</span>
+                        </div>
+                        ${check.checked_at ? `
+                        <div class="detail-item">
+                            <span class="detail-item__label">Last Check</span>
+                            <span class="detail-item__value">${new Date(check.checked_at).toLocaleString()}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-section__title">DNS</div>
+                        <div class="detail-item">
+                            <span class="detail-item__label">IP Addresses</span>
+                            <span class="detail-item__value">${(check.dns_ips || []).join(', ') || '-'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-item__label">Host Reachable</span>
+                            <span class="detail-item__value ${check.host_reachable ? 'text-ok' : 'text-error'}">${check.host_reachable ? 'Yes' : 'No'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-section__title">HTTP</div>
+                        <div class="detail-item">
+                            <span class="detail-item__label">Status Code</span>
+                            <span class="detail-item__value ${check.http_status >= 200 && check.http_status < 300 ? 'text-ok' : check.http_status >= 400 ? 'text-error' : ''}">${check.http_status || '-'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-item__label">Response Time</span>
+                            <span class="detail-item__value">${check.http_response_time ? check.http_response_time.toFixed(0) + ' ms' : '-'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-section__title">SSL Certificate</div>
+                        <div class="detail-item">
+                            <span class="detail-item__label">Valid</span>
+                            <span class="detail-item__value ${check.ssl_valid ? 'text-ok' : 'text-error'}">${check.ssl_valid ? 'Yes' : 'No'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-item__label">Issuer</span>
+                            <span class="detail-item__value">${check.ssl_issuer || '-'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-item__label">SANs</span>
+                            <span class="detail-item__value">${(check.ssl_sans || []).slice(0, 3).join(', ') || '-'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-item__label">Expires</span>
+                            <span class="detail-item__value">${check.ssl_not_after ? new Date(check.ssl_not_after).toLocaleDateString() : '-'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-section__title">Change Log</div>
+                        ${changesData.length > 0 ? `
+                        <ul class="change-log">
+                            ${changesData.map(change => `
+                                <li class="change-log__item">
+                                    <div class="change-log__item-header">
+                                        <span class="change-log__type">${change.change_type}</span>
+                                        <span class="change-log__time">${new Date(change.detected_at).toLocaleString()}</span>
+                                    </div>
+                                    <div class="change-log__diff">${JSON.stringify(change.new_value)}</div>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        ` : '<p class="change-log__empty">No changes recorded</p>'}
+                    </div>
+                    
+                    <div class="detail-section">
+                        <button class="btn btn--secondary" onclick="runCheck('${linkId}')">Run Check Now</button>
+                    </div>
+                `;
+            } catch (err) {
+                content.innerHTML = `<p class="text-error">Error loading details: ${err.message}</p>`;
+            }
+        }
+        
+        function closeDetailPanel() {
+            document.getElementById('detailPanel').classList.remove('detail-panel--open');
+            currentLinkId = null;
+        }
+        
+        document.getElementById('closeDetailPanel').addEventListener('click', closeDetailPanel);
+        
+        // =================================================================
+        // API Operations
+        // =================================================================
+        
+        async function loadLinks() {
+            try {
+                const res = await fetch(`${API_BASE}/links`);
+                links = await res.json();
+                
+                // Fetch status for each link
+                await Promise.all(links.map(async (link) => {
+                    try {
+                        const checkRes = await fetch(`${API_BASE}/links/${link.id}/check`);
+                        if (checkRes.ok) {
+                            const data = await checkRes.json();
+                            link.status = data.status;
+                        }
+                    } catch {
+                        link.status = 'unknown';
+                    }
+                }));
+                
+                renderLinks();
+            } catch (err) {
+                console.error('Error loading links:', err);
+            }
+        }
+        
+        async function addLink(url, port, title) {
+            try {
+                const res = await fetch(`${API_BASE}/links`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, port, title })
+                });
+                
+                if (res.ok) {
+                    await loadLinks();
+                    closeModal();
+                }
+            } catch (err) {
+                console.error('Error adding link:', err);
+            }
+        }
+        
+        async function runCheck(linkId) {
+            try {
+                await fetch(`${API_BASE}/links/${linkId}/check`, { method: 'POST' });
+                if (linkId === currentLinkId) {
+                    openDetailPanel(linkId);
+                }
+                await loadLinks();
+            } catch (err) {
+                console.error('Error running check:', err);
+            }
+        }
+        
+        // =================================================================
+        // Modal Handling
+        // =================================================================
+        
+        function openModal() {
+            document.getElementById('addLinkModal').classList.add('modal-overlay--open');
+            document.getElementById('linkUrl').focus();
+        }
+        
+        function closeModal() {
+            document.getElementById('addLinkModal').classList.remove('modal-overlay--open');
+            document.getElementById('addLinkForm').reset();
+            document.getElementById('linkPort').value = '443';
+        }
+        
+        document.getElementById('addLinkBtn').addEventListener('click', openModal);
+        document.getElementById('closeAddModal').addEventListener('click', closeModal);
+        
+        document.getElementById('addLinkModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeModal();
+        });
+        
+        document.getElementById('addLinkForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const url = document.getElementById('linkUrl').value;
+            const port = parseInt(document.getElementById('linkPort').value) || 443;
+            const title = document.getElementById('linkTitle').value;
+            await addLink(url, port, title || undefined);
+        });
+        
+        // =================================================================
+        // Initialize
+        // =================================================================
+        
+        initTheme();
+        loadLinks();
+        
+        // Auto-refresh every 60 seconds
+        setInterval(loadLinks, 60000);
+    </script>
+</body>
+</html>
