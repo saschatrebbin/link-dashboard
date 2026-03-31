@@ -104,6 +104,98 @@
         .header__actions {
             display: flex;
             gap: var(--space-sm);
+            align-items: center;
+        }
+
+        .context-bar {
+            margin-bottom: var(--space-lg);
+        }
+
+        .context-bar__list {
+            display: flex;
+            gap: var(--space-sm);
+            overflow-x: auto;
+            padding-bottom: var(--space-xs);
+        }
+
+        .context-chip-group {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .context-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            border: 1px solid var(--color-border);
+            border-radius: 999px;
+            background: var(--color-bg-secondary);
+            color: var(--color-text-secondary);
+            white-space: nowrap;
+            transition: all var(--transition-fast);
+        }
+
+        .context-chip__button {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            background: transparent;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            padding: 0;
+            font: inherit;
+        }
+
+        .context-chip:hover {
+            border-color: var(--color-accent-primary);
+            color: var(--color-text-primary);
+        }
+
+        .context-chip--active {
+            background: var(--color-accent-primary);
+            border-color: var(--color-accent-primary);
+            color: var(--color-bg-primary);
+        }
+
+        .context-chip__icon {
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        .context-chip__meta {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .context-chip__edit {
+            background: transparent;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            opacity: 0.8;
+            padding: 0;
+        }
+
+        .context-chip__edit:hover {
+            opacity: 1;
+        }
+
+        .context-chip__move {
+            background: transparent;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            opacity: 0.8;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .context-chip__move:hover {
+            opacity: 1;
         }
         
         /* ================================================================
@@ -386,7 +478,12 @@
         .theme-selector {
             position: relative;
         }
-        
+
+        .theme-selector__group {
+            display: inline-flex;
+            align-items: stretch;
+        }
+
         .theme-selector__btn {
             display: flex;
             align-items: center;
@@ -398,6 +495,20 @@
             color: var(--color-text-primary);
             cursor: pointer;
             font-size: 0.875rem;
+        }
+
+        .theme-selector__btn--label {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-right: none;
+            cursor: default;
+        }
+
+        .theme-selector__btn--value {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            min-width: 170px;
+            justify-content: space-between;
         }
         
         .theme-selector__dropdown {
@@ -498,6 +609,79 @@
             color: var(--color-text-muted);
             margin-bottom: var(--space-sm);
         }
+
+        .context-assignment {
+            display: grid;
+            gap: var(--space-sm);
+        }
+
+        .context-assignment__item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            color: var(--color-text-primary);
+        }
+
+        .context-assignment__item input {
+            accent-color: var(--color-accent-primary);
+        }
+
+        .icon-picker {
+            display: grid;
+            gap: var(--space-sm);
+        }
+
+        .icon-picker__categories {
+            display: flex;
+            gap: var(--space-xs);
+            overflow-x: auto;
+        }
+
+        .icon-picker__category {
+            padding: 6px 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 999px;
+            background: var(--color-bg-secondary);
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .icon-picker__category--active {
+            color: var(--color-bg-primary);
+            background: var(--color-accent-primary);
+            border-color: var(--color-accent-primary);
+        }
+
+        .icon-picker__grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+            gap: var(--space-sm);
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .icon-picker__option {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 52px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            background: var(--color-bg-tertiary);
+            cursor: pointer;
+            font-size: 1.25rem;
+        }
+
+        .icon-picker__option:hover {
+            border-color: var(--color-accent-primary);
+            background: var(--color-bg-hover);
+        }
+
+        .icon-picker__option--active {
+            border-color: var(--color-accent-primary);
+            box-shadow: inset 0 0 0 1px var(--color-accent-primary);
+        }
         
         .detail-item {
             display: flex;
@@ -505,6 +689,11 @@
             padding: var(--space-xs) 0;
             border-bottom: 1px solid var(--color-border);
             font-size: 0.875rem;
+            gap: var(--space-md);
+        }
+
+        .detail-item--stacked {
+            align-items: flex-start;
         }
         
         .detail-item__label {
@@ -515,6 +704,26 @@
             color: var(--color-text-primary);
             font-family: var(--font-mono);
             font-size: 0.8rem;
+            text-align: right;
+        }
+
+        .detail-list {
+            list-style: none;
+            display: grid;
+            gap: 4px;
+            text-align: right;
+        }
+
+        .detail-list li {
+            word-break: break-word;
+        }
+
+        .modal__actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-top: var(--space-md);
         }
         
         /* Change Log */
@@ -830,12 +1039,19 @@
         }
     </style>
 </head>
-<body data-theme="dark">
+<body>
     <div class="app-container">
         <!-- Header -->
         <header class="header">
             <h1 class="header__title">Link Dashboard</h1>
             <div class="header__actions">
+                <button class="btn btn--secondary" id="addContextBtn">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    Add Context
+                </button>
+                <button class="btn btn--secondary" id="runVisibleChecksBtn">
+                    Check All
+                </button>
                 <button class="btn btn--primary" id="addLinkBtn">
                     <svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
                     Add Link
@@ -843,16 +1059,28 @@
                 
                 <!-- Theme Selector -->
                 <div class="theme-selector">
-                    <button class="theme-selector__btn" id="themeBtn">
-                        <svg class="icon" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-                        <span id="currentTheme">Dark</span>
-                    </button>
+                    <div class="theme-selector__group">
+                        <div class="theme-selector__btn theme-selector__btn--label">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                            <span>Theme</span>
+                        </div>
+                        <button class="theme-selector__btn theme-selector__btn--value" id="themeBtn">
+                            <span id="currentTheme">Dark</span>
+                            <span>▾</span>
+                        </button>
+                    </div>
                     <div class="theme-selector__dropdown" id="themeDropdown">
                         <!-- Populated by JS -->
                     </div>
                 </div>
             </div>
         </header>
+
+        <section class="context-bar">
+            <div class="context-bar__list" id="contextList">
+                <!-- Contexts populated by JS -->
+            </div>
+        </section>
         
         <!-- Main Content -->
         <main>
@@ -872,12 +1100,13 @@
     <div class="modal-overlay" id="addLinkModal">
         <div class="modal">
             <div class="modal__header">
-                <h2 class="modal__title">Add New Link</h2>
+                <h2 class="modal__title" id="linkModalTitle">Add New Link</h2>
                 <button class="modal__close" id="closeAddModal">
                     <svg class="icon icon--lg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
                 </button>
             </div>
             <form id="addLinkForm">
+                <input type="hidden" id="linkId">
                 <div class="form-group">
                     <label class="form-label" for="linkUrl">URL *</label>
                     <input type="url" class="form-input" id="linkUrl" placeholder="https://example.com" required>
@@ -890,7 +1119,41 @@
                     <label class="form-label" for="linkTitle">Title (optional)</label>
                     <input type="text" class="form-input" id="linkTitle" placeholder="My Website">
                 </div>
-                <button type="submit" class="btn btn--primary">Add Link</button>
+                <button type="submit" class="btn btn--primary" id="saveLinkBtn">Add Link</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Context Modal -->
+    <div class="modal-overlay" id="addContextModal">
+        <div class="modal">
+            <div class="modal__header">
+                <h2 class="modal__title" id="contextModalTitle">Create Context</h2>
+                <button class="modal__close" id="closeContextModal">
+                    <svg class="icon icon--lg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </button>
+            </div>
+            <form id="addContextForm">
+                <input type="hidden" id="contextId">
+                <div class="form-group">
+                    <label class="form-label" for="contextName">Name *</label>
+                    <input type="text" class="form-input" id="contextName" placeholder="Work, Media, Admin" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="contextDescription">Description</label>
+                    <input type="text" class="form-input" id="contextDescription" placeholder="Optional note">
+                </div>
+                <div class="form-group icon-picker">
+                    <label class="form-label" for="contextIconSearch">Icon</label>
+                    <input type="text" class="form-input" id="contextIconSearch" placeholder="Search icons">
+                    <input type="hidden" id="contextIcon" value="folder">
+                    <div class="icon-picker__categories" id="contextIconCategories"></div>
+                    <div class="icon-picker__grid" id="contextIconGrid"></div>
+                </div>
+                <div class="modal__actions">
+                    <button type="button" class="btn btn--secondary" id="deleteContextBtn" style="display: none;">Delete Context</button>
+                    <button type="submit" class="btn btn--primary" id="saveContextBtn">Create Context</button>
+                </div>
             </form>
         </div>
     </div>
@@ -914,7 +1177,7 @@
         // Configuration
         // =================================================================
         
-        const API_BASE = 'http://127.0.0.1:8080/api';
+        const API_BASE = '/api';
         
         // Theme definitions
         const THEMES = [
@@ -927,14 +1190,76 @@
             { id: 'solarized-dark', name: 'Solarized Dark', colors: ['#002b36', '#268bd2', '#839496'] },
             { id: 'dracula', name: 'Dracula', colors: ['#282a36', '#bd93f9', '#f8f8f2'] },
         ];
+
+        const CONTEXT_ICONS = [
+            { id: 'folder', category: 'general', symbol: '📁', keywords: ['folder', 'ordner', 'general', 'allgemein', 'default', 'standard'] },
+            { id: 'pin', category: 'general', symbol: '📌', keywords: ['pin', 'fixiert', 'wichtig', 'merken'] },
+            { id: 'star', category: 'general', symbol: '⭐', keywords: ['star', 'stern', 'favorit', 'favorite'] },
+            { id: 'bookmark', category: 'general', symbol: '🔖', keywords: ['bookmark', 'lesezeichen', 'mark'] },
+            { id: 'globe', category: 'general', symbol: '🌍', keywords: ['globe', 'welt', 'world', 'web', 'internet'] },
+            { id: 'briefcase', category: 'work', symbol: '💼', keywords: ['work', 'arbeit', 'office', 'buero', 'business', 'job'] },
+            { id: 'calendar', category: 'work', symbol: '📅', keywords: ['calendar', 'kalender', 'termine', 'schedule'] },
+            { id: 'clipboard', category: 'work', symbol: '📋', keywords: ['clipboard', 'liste', 'tasks', 'aufgaben'] },
+            { id: 'mail', category: 'work', symbol: '📧', keywords: ['mail', 'email', 'post', 'inbox', 'kommunikation'] },
+            { id: 'chart', category: 'work', symbol: '📊', keywords: ['stats', 'statistik', 'monitoring', 'metrics', 'metriken'] },
+            { id: 'terminal', category: 'tech', symbol: '💻', keywords: ['dev', 'entwicklung', 'terminal', 'code', 'coding', 'programmierung'] },
+            { id: 'server', category: 'tech', symbol: '🖥️', keywords: ['server', 'infra', 'ops', 'betrieb', 'system'] },
+            { id: 'gear', category: 'tech', symbol: '⚙️', keywords: ['settings', 'einstellungen', 'system', 'config', 'konfiguration'] },
+            { id: 'cloud', category: 'tech', symbol: '☁️', keywords: ['cloud', 'wolke', 'hosting', 'apps'] },
+            { id: 'rocket', category: 'tech', symbol: '🚀', keywords: ['rocket', 'rakete', 'launch', 'start', 'deploy'] },
+            { id: 'satellite', category: 'tech', symbol: '🛰️', keywords: ['satellite', 'satellit', 'netz', 'network'] },
+            { id: 'wrench', category: 'tech', symbol: '🔧', keywords: ['wrench', 'werkzeug', 'tool', 'repair'] },
+            { id: 'shield', category: 'security', symbol: '🛡️', keywords: ['security', 'sicherheit', 'admin', 'auth', 'schutz'] },
+            { id: 'lock', category: 'security', symbol: '🔒', keywords: ['lock', 'schloss', 'secure', 'sicher', 'privacy'] },
+            { id: 'key', category: 'security', symbol: '🔑', keywords: ['key', 'schluessel', 'zugang', 'access'] },
+            { id: 'warning', category: 'security', symbol: '🚨', keywords: ['warning', 'alarm', 'alert', 'warnung'] },
+            { id: 'health', category: 'health', symbol: '🩺', keywords: ['health', 'gesundheit', 'medical', 'medizin', 'doctor', 'arzt'] },
+            { id: 'testtube', category: 'health', symbol: '🧪', keywords: ['testtube', 'reagenzglas', 'labor', 'lab', 'chemie', 'science', 'wissenschaft'] },
+            { id: 'hospital', category: 'health', symbol: '🏥', keywords: ['hospital', 'krankenhaus', 'klinik', 'clinic'] },
+            { id: 'pill', category: 'health', symbol: '💊', keywords: ['pill', 'tablette', 'medizin', 'medication'] },
+            { id: 'money', category: 'finance', symbol: '💶', keywords: ['money', 'geld', 'bank', 'finance', 'finanzen'] },
+            { id: 'creditcard', category: 'finance', symbol: '💳', keywords: ['creditcard', 'karte', 'payment', 'zahlung'] },
+            { id: 'receipt', category: 'finance', symbol: '🧾', keywords: ['receipt', 'beleg', 'rechnung', 'invoice'] },
+            { id: 'video', category: 'media', symbol: '🎬', keywords: ['video', 'medien', 'media', 'stream', 'streaming', 'film'] },
+            { id: 'music', category: 'media', symbol: '🎵', keywords: ['music', 'musik', 'audio', 'playlist'] },
+            { id: 'camera', category: 'media', symbol: '📷', keywords: ['camera', 'kamera', 'photo', 'foto'] },
+            { id: 'newspaper', category: 'media', symbol: '📰', keywords: ['news', 'nachrichten', 'newspaper', 'zeitung'] },
+            { id: 'book', category: 'docs', symbol: '📚', keywords: ['docs', 'dokumentation', 'wiki', 'reference', 'referenz', 'buch'] },
+            { id: 'page', category: 'docs', symbol: '📄', keywords: ['page', 'seite', 'document', 'dokument'] },
+            { id: 'school', category: 'docs', symbol: '🎓', keywords: ['school', 'lernen', 'lernen', 'study', 'bildung'] },
+            { id: 'home', category: 'personal', symbol: '🏠', keywords: ['home', 'zuhause', 'privat', 'private', 'personal'] },
+            { id: 'heart', category: 'personal', symbol: '❤️', keywords: ['heart', 'herz', 'family', 'familie', 'liebe'] },
+            { id: 'game', category: 'personal', symbol: '🎮', keywords: ['games', 'spiel', 'spiele', 'fun', 'play'] },
+            { id: 'shopping', category: 'personal', symbol: '🛒', keywords: ['shopping', 'einkauf', 'shop', 'kaufen'] },
+        ];
+
+        const ICON_CATEGORIES = [
+            { id: 'all', name: 'All' },
+            { id: 'general', name: 'General' },
+            { id: 'work', name: 'Work' },
+            { id: 'tech', name: 'Tech' },
+            { id: 'security', name: 'Security' },
+            { id: 'health', name: 'Health' },
+            { id: 'finance', name: 'Finance' },
+            { id: 'media', name: 'Media' },
+            { id: 'docs', name: 'Docs' },
+            { id: 'personal', name: 'Personal' },
+        ];
         
         // =================================================================
         // State
         // =================================================================
         
         let links = [];
+        let dashboards = [];
+        let dashboardMemberships = new Map();
+        let currentDashboardId = null;
+        let editingDashboardId = null;
+        let editingLinkId = null;
         let currentLinkId = null;
         let currentTheme = localStorage.getItem('linkdashboard-theme') || 'dark';
+        let pendingRefreshTimer = null;
+        let currentIconCategory = 'all';
         
         // =================================================================
         // Theme System
@@ -942,6 +1267,7 @@
         
         function initTheme() {
             // Set initial theme
+            document.documentElement.dataset.theme = currentTheme;
             document.body.dataset.theme = currentTheme;
             renderThemeDropdown();
             
@@ -991,6 +1317,7 @@
         
         function setTheme(themeId) {
             currentTheme = themeId;
+            document.documentElement.dataset.theme = themeId;
             document.body.dataset.theme = themeId;
             localStorage.setItem('linkdashboard-theme', themeId);
             renderThemeDropdown();
@@ -1036,6 +1363,85 @@
                 case 'error': return 'link-card__status--error';
                 default: return 'link-card__status--unknown';
             }
+        }
+
+        function getContextIcon(iconId) {
+            return CONTEXT_ICONS.find(icon => icon.id === iconId)?.symbol || '📁';
+        }
+
+        function renderIconCategories() {
+            document.getElementById('contextIconCategories').innerHTML = ICON_CATEGORIES.map(category => `
+                <button type="button" class="icon-picker__category ${category.id === currentIconCategory ? 'icon-picker__category--active' : ''}" data-category-id="${category.id}">
+                    ${category.name}
+                </button>
+            `).join('');
+        }
+
+        function renderContextIconPicker(filter = '') {
+            const normalizedFilter = filter.trim().toLowerCase();
+            const selectedIcon = document.getElementById('contextIcon').value || 'folder';
+            const options = CONTEXT_ICONS.filter(icon => {
+                if (currentIconCategory !== 'all' && icon.category !== currentIconCategory) {
+                    return false;
+                }
+
+                if (!normalizedFilter) {
+                    return true;
+                }
+
+                return icon.id.includes(normalizedFilter)
+                    || icon.keywords.some(keyword => keyword.includes(normalizedFilter));
+            });
+
+            document.getElementById('contextIconGrid').innerHTML = options.map(icon => `
+                <button type="button" class="icon-picker__option ${icon.id === selectedIcon ? 'icon-picker__option--active' : ''}" data-icon-id="${icon.id}" title="${icon.id}">
+                    ${icon.symbol}
+                </button>
+            `).join('');
+        }
+
+        function renderContexts() {
+            const list = document.getElementById('contextList');
+            list.innerHTML = [
+                `<div class="context-chip-group"><div class="context-chip ${currentDashboardId === null ? 'context-chip--active' : ''}" data-dashboard-id=""><button type="button" class="context-chip__button" data-dashboard-id="">All Links</button></div></div>`,
+                ...dashboards.map(dashboard => `
+                    <div class="context-chip-group">
+                        <div class="context-chip ${dashboard.id === currentDashboardId ? 'context-chip--active' : ''}" data-dashboard-id="${dashboard.id}">
+                            <button type="button" class="context-chip__button" data-dashboard-id="${dashboard.id}">
+                                <span class="context-chip__icon">${getContextIcon(dashboard.icon)}</span>
+                                <span class="context-chip__meta">${dashboard.name} <span class="text-muted">(${dashboard.link_count ?? 0})</span></span>
+                            </button>
+                        </div>
+                        <button type="button" class="context-chip__move" data-move-dashboard-id="${dashboard.id}" data-direction="left" title="Move left">←</button>
+                        <button type="button" class="context-chip__move" data-move-dashboard-id="${dashboard.id}" data-direction="right" title="Move right">→</button>
+                        <button type="button" class="context-chip__edit" data-edit-dashboard-id="${dashboard.id}" title="Edit context">✎</button>
+                    </div>
+                `)
+            ].join('');
+        }
+
+        async function loadDashboards() {
+            const res = await fetch(`${API_BASE}/dashboards`);
+            if (!res.ok) {
+                throw new Error(`Failed to load contexts (${res.status})`);
+            }
+
+            dashboards = await res.json();
+            renderContexts();
+        }
+
+        async function loadDashboardMemberships() {
+            const entries = await Promise.all(dashboards.map(async (dashboard) => {
+                const res = await fetch(`${API_BASE}/dashboards/${dashboard.id}`);
+                if (!res.ok) {
+                    return [dashboard.id, new Set()];
+                }
+
+                const data = await res.json();
+                return [dashboard.id, new Set((data.links || []).map(link => link.id))];
+            }));
+
+            dashboardMemberships = new Map(entries);
         }
         
         function renderLinks() {
@@ -1101,16 +1507,50 @@
                     fetch(`${API_BASE}/links/${linkId}/check`),
                     fetch(`${API_BASE}/links/${linkId}/changes`)
                 ]);
+
+                if (!linkRes.ok) {
+                    throw new Error(`Failed to load link (${linkRes.status})`);
+                }
+
+                if (!checkRes.ok) {
+                    throw new Error(`Failed to load check result (${checkRes.status})`);
+                }
+
+                if (!changesRes.ok) {
+                    throw new Error(`Failed to load change log (${changesRes.status})`);
+                }
                 
                 const linkData = await linkRes.json();
                 const checkData = await checkRes.json();
                 const changesData = await changesRes.json();
+                const contextItems = dashboards.map(dashboard => `
+                    <label class="context-assignment__item">
+                        <input type="checkbox" data-dashboard-id="${dashboard.id}" ${dashboardMemberships.get(dashboard.id)?.has(linkId) ? 'checked' : ''}>
+                        <span>${getContextIcon(dashboard.icon)} ${dashboard.name}</span>
+                    </label>
+                `).join('');
                 
                 const check = checkData.check_result || {};
                 const statusClass = checkData.status === 'ok' ? 'text-ok' : 
                                    checkData.status === 'warn' ? 'text-warn' : 'text-error';
                 
                 content.innerHTML = `
+                    <div class="detail-section">
+                        <div class="detail-section__title">Link</div>
+                        <div class="detail-item">
+                            <span class="detail-item__label">Title</span>
+                            <span class="detail-item__value">${linkData.title || '-'}</span>
+                        </div>
+                        <div class="detail-item detail-item--stacked">
+                            <span class="detail-item__label">URL</span>
+                            <div class="detail-item__value">${linkData.url}</div>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-item__label">Port</span>
+                            <span class="detail-item__value">${linkData.port}</span>
+                        </div>
+                    </div>
+
                     <div class="detail-section">
                         <div class="detail-section__title">Status</div>
                         <div class="detail-item">
@@ -1127,9 +1567,9 @@
                     
                     <div class="detail-section">
                         <div class="detail-section__title">DNS</div>
-                        <div class="detail-item">
+                        <div class="detail-item detail-item--stacked">
                             <span class="detail-item__label">IP Addresses</span>
-                            <span class="detail-item__value">${(check.dns_ips || []).join(', ') || '-'}</span>
+                            <div class="detail-item__value">${(check.dns_ips || []).length ? `<ul class="detail-list">${check.dns_ips.map(ip => `<li>${ip}</li>`).join('')}</ul>` : '-'}</div>
                         </div>
                         <div class="detail-item">
                             <span class="detail-item__label">Host Reachable</span>
@@ -1159,9 +1599,9 @@
                             <span class="detail-item__label">Issuer</span>
                             <span class="detail-item__value">${check.ssl_issuer || '-'}</span>
                         </div>
-                        <div class="detail-item">
+                        <div class="detail-item detail-item--stacked">
                             <span class="detail-item__label">SANs</span>
-                            <span class="detail-item__value">${(check.ssl_sans || []).slice(0, 3).join(', ') || '-'}</span>
+                            <div class="detail-item__value">${(check.ssl_sans || []).length ? `<ul class="detail-list">${check.ssl_sans.map(san => `<li>${san}</li>`).join('')}</ul>` : '-'}</div>
                         </div>
                         <div class="detail-item">
                             <span class="detail-item__label">Expires</span>
@@ -1169,6 +1609,15 @@
                         </div>
                     </div>
                     
+                    <div class="detail-section">
+                        <div class="detail-section__title">Contexts</div>
+                        ${dashboards.length > 0 ? `
+                        <div class="context-assignment" id="contextAssignments">
+                            ${contextItems}
+                        </div>
+                        ` : '<p class="change-log__empty">No contexts yet</p>'}
+                    </div>
+
                     <div class="detail-section">
                         <div class="detail-section__title">Change Log</div>
                         ${changesData.length > 0 ? `
@@ -1187,11 +1636,27 @@
                     </div>
                     
                     <div class="detail-section">
-                        <button class="btn btn--secondary" onclick="runCheck('${linkId}')">Run Check Now</button>
+                        <button class="btn btn--secondary" onclick="openEditLinkModal('${linkId}')">Edit Link</button>
+                    </div>
+
+                    <div class="detail-section">
+                        <button class="btn btn--secondary" id="runCheckBtn" onclick="runCheck('${linkId}')">Run Check Now</button>
                     </div>
                 `;
             } catch (err) {
                 content.innerHTML = `<p class="text-error">Error loading details: ${err.message}</p>`;
+            }
+
+            const assignments = document.getElementById('contextAssignments');
+            if (assignments) {
+                assignments.addEventListener('change', async (event) => {
+                    const checkbox = event.target.closest('input[type="checkbox"]');
+                    if (!checkbox) {
+                        return;
+                    }
+
+                    await updateLinkContextMembership(linkId, checkbox.dataset.dashboardId, checkbox.checked);
+                });
             }
         }
         
@@ -1205,11 +1670,127 @@
         // =================================================================
         // API Operations
         // =================================================================
+
+        async function updateLinkContextMembership(linkId, dashboardId, isMember) {
+            const method = isMember ? 'POST' : 'DELETE';
+            const url = isMember
+                ? `${API_BASE}/dashboards/${dashboardId}/links`
+                : `${API_BASE}/dashboards/${dashboardId}/links/${linkId}`;
+
+            const options = { method };
+            if (isMember) {
+                options.headers = { 'Content-Type': 'application/json' };
+                options.body = JSON.stringify({ link_id: linkId });
+            }
+
+            const res = await fetch(url, options);
+            if (!res.ok && !(res.status === 400 && isMember)) {
+                throw new Error(`Failed to update context (${res.status})`);
+            }
+
+            await loadDashboards();
+            await loadDashboardMemberships();
+            await loadLinks();
+        }
+
+        async function createContext(name, description, icon) {
+            const res = await fetch(`${API_BASE}/dashboards`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description, icon })
+            });
+
+            if (!res.ok) {
+                throw new Error(`Failed to create context (${res.status})`);
+            }
+
+            const dashboard = await res.json();
+            currentDashboardId = dashboard.id;
+            await loadDashboards();
+            await loadDashboardMemberships();
+            await loadLinks();
+            closeContextModal();
+        }
+
+        async function saveContext(contextId, name, description, icon) {
+            if (!contextId) {
+                return createContext(name, description, icon);
+            }
+
+            const res = await fetch(`${API_BASE}/dashboards/${contextId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description, icon })
+            });
+
+            if (!res.ok) {
+                throw new Error(`Failed to update context (${res.status})`);
+            }
+
+            await loadDashboards();
+            await loadDashboardMemberships();
+            await loadLinks();
+            closeContextModal();
+        }
+
+        async function deleteContext(contextId) {
+            const res = await fetch(`${API_BASE}/dashboards/${contextId}`, { method: 'DELETE' });
+            if (!res.ok) {
+                throw new Error(`Failed to delete context (${res.status})`);
+            }
+
+            if (currentDashboardId === contextId) {
+                currentDashboardId = null;
+            }
+
+            await loadDashboards();
+            await loadDashboardMemberships();
+            await loadLinks();
+            closeContextModal();
+        }
+
+        async function moveContext(dashboardId, direction) {
+            const index = dashboards.findIndex(dashboard => dashboard.id === dashboardId);
+            if (index === -1) {
+                return;
+            }
+
+            const targetIndex = direction === 'left' ? index - 1 : index + 1;
+            if (targetIndex < 0 || targetIndex >= dashboards.length) {
+                return;
+            }
+
+            const reordered = [...dashboards];
+            const [item] = reordered.splice(index, 1);
+            reordered.splice(targetIndex, 0, item);
+
+            const res = await fetch(`${API_BASE}/dashboards/reorder`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ dashboard_ids: reordered.map(dashboard => dashboard.id) })
+            });
+
+            if (!res.ok) {
+                throw new Error(`Failed to reorder contexts (${res.status})`);
+            }
+
+            dashboards = await res.json();
+            renderContexts();
+        }
         
         async function loadLinks() {
             try {
-                const res = await fetch(`${API_BASE}/links`);
-                links = await res.json();
+                const endpoint = currentDashboardId
+                    ? `${API_BASE}/dashboards/${currentDashboardId}`
+                    : `${API_BASE}/links`;
+                const res = await fetch(endpoint);
+                if (!res.ok) {
+                    throw new Error(`Failed to load links (${res.status})`);
+                }
+
+                const payload = await res.json();
+                links = currentDashboardId ? (payload.links || []) : payload;
+                let scheduledChecks = 0;
                 
                 // Fetch status for each link
                 await Promise.all(links.map(async (link) => {
@@ -1218,6 +1799,18 @@
                         if (checkRes.ok) {
                             const data = await checkRes.json();
                             link.status = data.status;
+                            return;
+                        }
+
+                        if (checkRes.status === 404) {
+                            const runRes = await fetch(`${API_BASE}/links/${link.id}/check`, { method: 'POST' });
+                            if (runRes.ok) {
+                                const data = await runRes.json();
+                                link.status = data.status;
+                                scheduledChecks += 1;
+                                return;
+                            }
+                            link.status = 'unknown';
                         }
                     } catch {
                         link.status = 'unknown';
@@ -1225,6 +1818,14 @@
                 }));
                 
                 renderLinks();
+
+                if (pendingRefreshTimer) {
+                    clearTimeout(pendingRefreshTimer);
+                }
+
+                if (scheduledChecks > 0) {
+                    pendingRefreshTimer = setTimeout(loadLinks, 2500);
+                }
             } catch (err) {
                 console.error('Error loading links:', err);
             }
@@ -1237,25 +1838,94 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url, port, title })
                 });
-                
-                if (res.ok) {
-                    await loadLinks();
-                    closeModal();
+
+                if (!res.ok) {
+                    throw new Error(`Failed to add link (${res.status})`);
                 }
+
+                const createdLink = await res.json();
+                if (currentDashboardId) {
+                    await updateLinkContextMembership(createdLink.id, currentDashboardId, true);
+                }
+                closeModal();
+                await loadLinks();
             } catch (err) {
                 console.error('Error adding link:', err);
             }
         }
+
+        async function updateLinkDetails(linkId, url, port, title) {
+            try {
+                const res = await fetch(`${API_BASE}/links/${linkId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, port, title })
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Failed to update link (${res.status})`);
+                }
+
+                closeModal();
+                await loadLinks();
+                if (currentLinkId === linkId) {
+                    await openDetailPanel(linkId);
+                }
+            } catch (err) {
+                console.error('Error updating link:', err);
+            }
+        }
         
         async function runCheck(linkId) {
+            const button = document.getElementById('runCheckBtn');
+            const originalLabel = button ? button.textContent : 'Run Check Now';
+
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'Checking...';
+            }
+
             try {
                 await fetch(`${API_BASE}/links/${linkId}/check`, { method: 'POST' });
                 if (linkId === currentLinkId) {
-                    openDetailPanel(linkId);
+                    await openDetailPanel(linkId);
                 }
                 await loadLinks();
             } catch (err) {
                 console.error('Error running check:', err);
+            } finally {
+                const currentButton = document.getElementById('runCheckBtn');
+                if (currentButton) {
+                    currentButton.disabled = false;
+                    currentButton.textContent = originalLabel;
+                }
+            }
+        }
+
+        async function runVisibleChecks() {
+            const button = document.getElementById('runVisibleChecksBtn');
+            if (links.length === 0) {
+                return;
+            }
+
+            const originalLabel = button.textContent;
+            button.disabled = true;
+            button.textContent = 'Checking...';
+
+            try {
+                await Promise.all(links.map(link =>
+                    fetch(`${API_BASE}/links/${link.id}/check`, { method: 'POST' })
+                ));
+
+                await loadLinks();
+                if (currentLinkId) {
+                    await openDetailPanel(currentLinkId);
+                }
+            } catch (err) {
+                console.error('Error running visible checks:', err);
+            } finally {
+                button.disabled = false;
+                button.textContent = originalLabel;
             }
         }
         
@@ -1264,29 +1934,197 @@
         // =================================================================
         
         function openModal() {
+            editingLinkId = null;
+            document.getElementById('linkModalTitle').textContent = 'Add New Link';
+            document.getElementById('saveLinkBtn').textContent = 'Add Link';
+            document.getElementById('linkId').value = '';
             document.getElementById('addLinkModal').classList.add('modal-overlay--open');
             document.getElementById('linkUrl').focus();
         }
+
+        function openEditLinkModal(linkId) {
+            const link = links.find(item => item.id === linkId);
+            if (!link) {
+                return;
+            }
+
+            editingLinkId = linkId;
+            document.getElementById('linkModalTitle').textContent = 'Edit Link';
+            document.getElementById('saveLinkBtn').textContent = 'Save Link';
+            document.getElementById('linkId').value = link.id;
+            document.getElementById('linkUrl').value = link.url || '';
+            document.getElementById('linkPort').value = link.port || 443;
+            document.getElementById('linkTitle').value = link.title || '';
+            document.getElementById('addLinkModal').classList.add('modal-overlay--open');
+            document.getElementById('linkTitle').focus();
+        }
         
         function closeModal() {
+            editingLinkId = null;
             document.getElementById('addLinkModal').classList.remove('modal-overlay--open');
             document.getElementById('addLinkForm').reset();
+            document.getElementById('linkId').value = '';
+            document.getElementById('linkModalTitle').textContent = 'Add New Link';
+            document.getElementById('saveLinkBtn').textContent = 'Add Link';
             document.getElementById('linkPort').value = '443';
+        }
+
+        function openContextModal() {
+            editingDashboardId = null;
+            currentIconCategory = 'all';
+            document.getElementById('contextModalTitle').textContent = 'Create Context';
+            document.getElementById('saveContextBtn').textContent = 'Create Context';
+            document.getElementById('deleteContextBtn').style.display = 'none';
+            document.getElementById('contextId').value = '';
+            document.getElementById('contextDescription').value = '';
+            document.getElementById('contextIcon').value = 'folder';
+            document.getElementById('contextIconSearch').value = '';
+            renderIconCategories();
+            renderContextIconPicker();
+            document.getElementById('addContextModal').classList.add('modal-overlay--open');
+            document.getElementById('contextName').focus();
+        }
+
+        function openEditContextModal(dashboardId) {
+            const dashboard = dashboards.find(item => item.id === dashboardId);
+            if (!dashboard) {
+                return;
+            }
+
+            editingDashboardId = dashboardId;
+            currentIconCategory = 'all';
+            document.getElementById('contextModalTitle').textContent = 'Edit Context';
+            document.getElementById('saveContextBtn').textContent = 'Save Context';
+            document.getElementById('deleteContextBtn').style.display = 'inline-flex';
+            document.getElementById('contextId').value = dashboard.id;
+            document.getElementById('contextName').value = dashboard.name || '';
+            document.getElementById('contextDescription').value = dashboard.description || '';
+            document.getElementById('contextIcon').value = dashboard.icon || 'folder';
+            document.getElementById('contextIconSearch').value = '';
+            renderIconCategories();
+            renderContextIconPicker();
+            document.getElementById('addContextModal').classList.add('modal-overlay--open');
+            document.getElementById('contextName').focus();
+        }
+
+        function closeContextModal() {
+            editingDashboardId = null;
+            currentIconCategory = 'all';
+            document.getElementById('addContextModal').classList.remove('modal-overlay--open');
+            document.getElementById('addContextForm').reset();
+            document.getElementById('contextId').value = '';
+            document.getElementById('contextIcon').value = 'folder';
+            document.getElementById('contextIconSearch').value = '';
+            document.getElementById('deleteContextBtn').style.display = 'none';
+            renderIconCategories();
+            renderContextIconPicker();
         }
         
         document.getElementById('addLinkBtn').addEventListener('click', openModal);
+        document.getElementById('addContextBtn').addEventListener('click', openContextModal);
+        document.getElementById('runVisibleChecksBtn').addEventListener('click', runVisibleChecks);
         document.getElementById('closeAddModal').addEventListener('click', closeModal);
+        document.getElementById('closeContextModal').addEventListener('click', closeContextModal);
         
         document.getElementById('addLinkModal').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) closeModal();
         });
+
+        document.getElementById('addContextModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeContextModal();
+        });
+
+        document.getElementById('contextList').addEventListener('click', async (e) => {
+            const editButton = e.target.closest('[data-edit-dashboard-id]');
+            if (editButton) {
+                e.stopPropagation();
+                openEditContextModal(editButton.dataset.editDashboardId);
+                return;
+            }
+
+            const moveButton = e.target.closest('[data-move-dashboard-id]');
+            if (moveButton) {
+                e.stopPropagation();
+                await moveContext(moveButton.dataset.moveDashboardId, moveButton.dataset.direction);
+                return;
+            }
+
+            const button = e.target.closest('[data-dashboard-id]');
+            if (!button) {
+                return;
+            }
+
+            currentDashboardId = button.dataset.dashboardId || null;
+            renderContexts();
+            await loadLinks();
+        });
+
+        document.getElementById('contextIconSearch').addEventListener('input', (e) => {
+            renderContextIconPicker(e.target.value);
+        });
+
+        document.getElementById('contextIconCategories').addEventListener('click', (e) => {
+            const button = e.target.closest('[data-category-id]');
+            if (!button) {
+                return;
+            }
+
+            currentIconCategory = button.dataset.categoryId;
+            renderIconCategories();
+            renderContextIconPicker(document.getElementById('contextIconSearch').value);
+        });
+
+        document.getElementById('contextIconGrid').addEventListener('click', (e) => {
+            const button = e.target.closest('.icon-picker__option');
+            if (!button) {
+                return;
+            }
+
+            document.getElementById('contextIcon').value = button.dataset.iconId;
+            renderContextIconPicker(document.getElementById('contextIconSearch').value);
+        });
         
         document.getElementById('addLinkForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const linkId = document.getElementById('linkId').value;
             const url = document.getElementById('linkUrl').value;
             const port = parseInt(document.getElementById('linkPort').value) || 443;
             const title = document.getElementById('linkTitle').value;
+            if (linkId) {
+                await updateLinkDetails(linkId, url, port, title || undefined);
+                return;
+            }
+
             await addLink(url, port, title || undefined);
+        });
+
+        document.getElementById('addContextForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const contextId = document.getElementById('contextId').value;
+            const name = document.getElementById('contextName').value;
+            const description = document.getElementById('contextDescription').value;
+            const icon = document.getElementById('contextIcon').value;
+            await saveContext(contextId || undefined, name, description || undefined, icon);
+        });
+
+        document.getElementById('deleteContextBtn').addEventListener('click', async () => {
+            const contextId = document.getElementById('contextId').value;
+            if (!contextId) {
+                return;
+            }
+
+            const contextName = document.getElementById('contextName').value || 'this context';
+
+            if (!window.confirm('Delete this context? Link entries stay in the registry.')) {
+                return;
+            }
+
+            const confirmation = window.prompt(`Type the context name to confirm deletion: ${contextName}`);
+            if (confirmation !== contextName) {
+                return;
+            }
+
+            await deleteContext(contextId);
         });
         
         // =================================================================
@@ -1294,7 +2132,12 @@
         // =================================================================
         
         initTheme();
-        loadLinks();
+        renderIconCategories();
+        renderContextIconPicker();
+        loadDashboards()
+            .then(loadDashboardMemberships)
+            .then(loadLinks)
+            .catch(err => console.error('Error initializing app:', err));
         
         // Auto-refresh every 60 seconds
         setInterval(loadLinks, 60000);

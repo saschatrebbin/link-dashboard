@@ -1,12 +1,13 @@
-"""
-Link Dashboard Backend API.
-FastAPI-based REST API.
-"""
+"""Link Dashboard Backend API."""
+
+import os
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, HttpUrl
-from typing import Optional
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
+from typing import Any, Optional
 import uvicorn
 
 from models import (
@@ -19,6 +20,9 @@ from models import (
     create_dashboard,
     get_dashboard,
     get_all_dashboards,
+    update_dashboard,
+    delete_dashboard,
+    reorder_dashboards,
     add_link_to_dashboard,
     remove_link_from_dashboard,
     save_check_result,
@@ -29,6 +33,11 @@ from models import (
     dismiss_change_log,
 )
 from checks import perform_check, detect_changes, get_status_indicator
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_INDEX_PATH = Path(
+    os.getenv("LINKBOARD_FRONTEND_INDEX", str(BASE_DIR / "frontend" / "index.html"))
+)
 
 # Initialize database
 init_db()
@@ -50,6 +59,19 @@ app.add_middleware(
 )
 
 
+@app.get("/", include_in_schema=False)
+def root_frontend():
+    """Serve the single-page frontend."""
+    return FileResponse(FRONTEND_INDEX_PATH)
+
+
+@app.get("/frontend", include_in_schema=False)
+@app.get("/frontend/", include_in_schema=False)
+def frontend_alias():
+    """Serve the frontend from the legacy path too."""
+    return FileResponse(FRONTEND_INDEX_PATH)
+
+
 # ============================================================================
 # Pydantic Models
 # ============================================================================
@@ -59,6 +81,7 @@ class LinkCreate(BaseModel):
     url: str
     port: int = 443
     custom_icon: Optional[str] = None
+    title: Optional[str] = None
 
 
 class LinkUpdate(BaseModel):
@@ -72,11 +95,22 @@ class LinkUpdate(BaseModel):
 class DashboardCreate(BaseModel):
     name: str
     description: Optional[str] = None
+    icon: Optional[str] = None
+
+
+class DashboardUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    icon: Optional[str] = None
 
 
 class DashboardLinkAdd(BaseModel):
     link_id: str
     position: Optional[int] = None
+
+
+class DashboardReorder(BaseModel):
+    dashboard_ids: list[str]
 
 
 class CheckResponse(BaseModel):
@@ -89,8 +123,8 @@ class ChangeLogResponse(BaseModel):
     id: int
     link_id: str
     change_type: str
-    old_value: Optional[dict]
-    new_value: Optional[dict]
+    old_value: Optional[Any]
+    new_value: Optional[Any]
     detected_at: str
     dismissed: bool
 
@@ -104,7 +138,7 @@ class ChangeLogResponse(BaseModel):
 def create_link_endpoint(link: LinkCreate):
     """Create a new link in the registry."""
     try:
-        return create_link(link.url, link.port, link.custom_icon)
+        return create_link(link.url, link.port, link.custom_icon, link.title)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -151,7 +185,7 @@ def delete_link_endpoint(link_id: str):
 @app.post("/api/dashboards", response_model=dict)
 def create_dashboard_endpoint(dashboard: DashboardCreate):
     """Create a new dashboard."""
-    return create_dashboard(dashboard.name, dashboard.description)
+    return create_dashboard(dashboard.name, dashboard.description, dashboard.icon)
 
 
 @app.get("/api/dashboards", response_model=list[dict])
@@ -178,6 +212,37 @@ def get_dashboard_endpoint(dashboard_id: str):
             link["last_check"] = None
 
     return dashboard
+
+
+@app.patch("/api/dashboards/{dashboard_id}", response_model=dict)
+def update_dashboard_endpoint(dashboard_id: str, dashboard: DashboardUpdate):
+    """Update a dashboard."""
+    existing = get_dashboard(dashboard_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Dashboard not found")
+
+    updates = dashboard.model_dump(exclude_unset=True)
+    return update_dashboard(dashboard_id, **updates)
+
+
+@app.delete("/api/dashboards/{dashboard_id}")
+def delete_dashboard_endpoint(dashboard_id: str):
+    """Delete a dashboard."""
+    if not delete_dashboard(dashboard_id):
+        raise HTTPException(status_code=404, detail="Dashboard not found")
+    return {"message": "Dashboard deleted"}
+
+
+@app.post("/api/dashboards/reorder", response_model=list[dict])
+def reorder_dashboards_endpoint(payload: DashboardReorder):
+    """Persist dashboard order."""
+    existing_ids = {dashboard["id"] for dashboard in get_all_dashboards()}
+    if set(payload.dashboard_ids) != existing_ids:
+        raise HTTPException(
+            status_code=400,
+            detail="Dashboard list must include all dashboards exactly once",
+        )
+    return reorder_dashboards(payload.dashboard_ids)
 
 
 @app.post("/api/dashboards/{dashboard_id}/links")
@@ -229,16 +294,13 @@ def run_check_for_link(link_id: str):
 
 
 @app.post("/api/links/{link_id}/check", response_model=CheckResponse)
-def check_link_endpoint(link_id: str, background_tasks: BackgroundTasks):
-    """Run a monitoring check for a link."""
+def check_link_endpoint(link_id: str):
+    """Run a monitoring check for a link and return the fresh result."""
     link = get_link(link_id)
     if not link:
         raise HTTPException(status_code=404, detail="Link not found")
 
-    # Run check in background
-    background_tasks.add_task(run_check_for_link, link_id)
-
-    # Get latest result (might be from previous check if background hasn't finished)
+    run_check_for_link(link_id)
     check_result = get_latest_check_result(link_id)
     status = get_status_indicator(check_result) if check_result else "unknown"
 
@@ -321,8 +383,10 @@ def health_check():
 # ============================================================================
 
 
-def run_server(host: str = "127.0.0.1", port: int = 8080):
+def run_server(host: Optional[str] = None, port: Optional[int] = None):
     """Run the API server."""
+    host = host or os.getenv("LINKBOARD_HOST", "0.0.0.0")
+    port = port or int(os.getenv("LINKBOARD_PORT", "8080"))
     uvicorn.run(app, host=host, port=port)
 
 

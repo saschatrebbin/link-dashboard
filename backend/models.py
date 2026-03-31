@@ -4,13 +4,25 @@ Uses SQLite with direct SQL for simplicity.
 """
 
 import sqlite3
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 import json
 
-DATA_DIR = Path(__file__).parent.parent / "data"
-DB_PATH = DATA_DIR / "linkdashboard.db"
+DEFAULT_DATA_DIR = Path(__file__).parent.parent / "data"
+DB_PATH = Path(
+    os.getenv("LINKBOARD_DB_PATH", str(DEFAULT_DATA_DIR / "linkdashboard.db"))
+)
+
+
+def ensure_data_dir_writable() -> None:
+    """Fail early if the configured data directory is not writable."""
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    test_path = DB_PATH.parent / ".write-test"
+    with open(test_path, "w", encoding="utf-8") as handle:
+        handle.write("ok")
+    test_path.unlink()
 
 
 def get_db() -> sqlite3.Connection:
@@ -24,6 +36,7 @@ def get_db() -> sqlite3.Connection:
 
 def init_db():
     """Initialize database with schema."""
+    ensure_data_dir_writable()
     conn = get_db()
     cursor = conn.cursor()
 
@@ -47,10 +60,30 @@ def init_db():
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
             description TEXT,
+            icon TEXT,
+            position INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+
+    cursor.execute("PRAGMA table_info(dashboards)")
+    dashboard_columns = {row[1] for row in cursor.fetchall()}
+    if "icon" not in dashboard_columns:
+        cursor.execute("ALTER TABLE dashboards ADD COLUMN icon TEXT")
+    if "position" not in dashboard_columns:
+        cursor.execute("ALTER TABLE dashboards ADD COLUMN position INTEGER DEFAULT 0")
+        cursor.execute(
+            """
+            UPDATE dashboards
+            SET position = (
+                SELECT COUNT(*)
+                FROM dashboards d2
+                WHERE d2.created_at <= dashboards.created_at
+            )
+            WHERE position = 0
+            """
+        )
 
     # Dashboard-Link relationship (many-to-many via position)
     cursor.execute("""
@@ -121,7 +154,12 @@ def init_db():
 # ============================================================================
 
 
-def create_link(url: str, port: int = 443, custom_icon: str = None) -> dict:
+def create_link(
+    url: str,
+    port: int = 443,
+    custom_icon: Optional[str] = None,
+    title: Optional[str] = None,
+) -> dict:
     """Create a new link."""
     import uuid
 
@@ -130,8 +168,8 @@ def create_link(url: str, port: int = 443, custom_icon: str = None) -> dict:
 
     try:
         conn.execute(
-            "INSERT INTO links (id, url, port, custom_icon) VALUES (?, ?, ?, ?)",
-            (link_id, url, port, custom_icon),
+            "INSERT INTO links (id, url, port, custom_icon, title) VALUES (?, ?, ?, ?, ?)",
+            (link_id, url, port, custom_icon, title),
         )
         conn.commit()
         result = get_link(link_id)
@@ -194,16 +232,21 @@ def delete_link(link_id: str) -> bool:
 # ============================================================================
 
 
-def create_dashboard(name: str, description: str = None) -> dict:
+def create_dashboard(
+    name: str, description: Optional[str] = None, icon: Optional[str] = None
+) -> dict:
     """Create a new dashboard."""
     import uuid
 
     conn = get_db()
     dashboard_id = str(uuid.uuid4())[:8]
+    cursor = conn.execute("SELECT MAX(position) FROM dashboards")
+    max_position = cursor.fetchone()[0]
+    position = (max_position or 0) + 1
 
     conn.execute(
-        "INSERT INTO dashboards (id, name, description) VALUES (?, ?, ?)",
-        (dashboard_id, name, description),
+        "INSERT INTO dashboards (id, name, description, icon, position) VALUES (?, ?, ?, ?, ?)",
+        (dashboard_id, name, description, icon, position),
     )
     conn.commit()
     result = get_dashboard(dashboard_id)
@@ -255,11 +298,53 @@ def get_all_dashboards() -> list[dict]:
         FROM dashboards d
         LEFT JOIN dashboard_links dl ON d.id = dl.dashboard_id
         GROUP BY d.id
-        ORDER BY d.created_at DESC
+        ORDER BY d.position, d.created_at DESC
     """)
     rows = cursor.fetchall()
     conn.close()
     return [dict(row) for row in rows]
+
+
+def update_dashboard(dashboard_id: str, **kwargs) -> Optional[dict]:
+    """Update dashboard fields."""
+    allowed = ["name", "description", "icon", "position"]
+    updates = {k: v for k, v in kwargs.items() if k in allowed}
+
+    if not updates:
+        return get_dashboard(dashboard_id)
+
+    updates["updated_at"] = datetime.now().isoformat()
+    set_clause = ", ".join([f"{k} = ?" for k in updates.keys()])
+    values = list(updates.values()) + [dashboard_id]
+
+    conn = get_db()
+    conn.execute(f"UPDATE dashboards SET {set_clause} WHERE id = ?", values)
+    conn.commit()
+    conn.close()
+    return get_dashboard(dashboard_id)
+
+
+def delete_dashboard(dashboard_id: str) -> bool:
+    """Delete a dashboard and its assignments."""
+    conn = get_db()
+    cursor = conn.execute("DELETE FROM dashboards WHERE id = ?", (dashboard_id,))
+    conn.commit()
+    deleted = cursor.rowcount > 0
+    conn.close()
+    return deleted
+
+
+def reorder_dashboards(dashboard_ids: list[str]) -> list[dict]:
+    """Persist dashboard order by the provided ID list."""
+    conn = get_db()
+    for index, dashboard_id in enumerate(dashboard_ids, start=1):
+        conn.execute(
+            "UPDATE dashboards SET position = ?, updated_at = ? WHERE id = ?",
+            (index, datetime.now().isoformat(), dashboard_id),
+        )
+    conn.commit()
+    conn.close()
+    return get_all_dashboards()
 
 
 def add_link_to_dashboard(

@@ -11,6 +11,10 @@ build/
 # Task board
 .mdboard/
 
+# Local tooling
+.claude/
+.opencode/
+
 # Environment
 .env
 venv/
