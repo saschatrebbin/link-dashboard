@@ -74,6 +74,15 @@ Key routes:
 - `DELETE /api/dashboards/{id}`
 - `POST /api/dashboards/reorder`
 - `POST /api/links/{id}/check`
+- `GET /api/areas`, `POST /api/areas`, `GET/PATCH/DELETE /api/areas/{id}`
+- `GET /api/areas/{id}/links` and `/api/areas/{id}/dashboards`
+- `PUT/DELETE /api/areas/{id}/links/{link_id}` and `/api/areas/{id}/dashboards/{dashboard_id}`
+- `GET /api/links/{id}/areas` and `/api/dashboards/{id}/areas`
+
+`PUT` membership calls are idempotent. Removing a membership or deleting an
+area leaves the linked objects intact. Existing link-to-dashboard memberships
+remain independent of area memberships. Area endpoints expose direct
+memberships only; combined filtering and the UI are separate work.
 
 ### Configuration
 
@@ -140,6 +149,15 @@ Important fields:
 ### dashboard_links
 
 Many-to-many mapping between contexts and links.
+
+### areas, area_links, area_dashboards
+
+Areas are user-defined navigation filters, not authentication or security
+boundaries. Links and dashboards can each belong to multiple areas; these
+assignments are independent of each other and of `dashboard_links`. The
+additive tables do not assign existing entries to an area automatically. Area
+CRUD and membership APIs are available, but the current frontend does not yet
+offer area management or area filtering.
 
 ### check_results
 

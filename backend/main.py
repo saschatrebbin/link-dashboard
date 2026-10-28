@@ -1,12 +1,13 @@
 """Link Dashboard Backend API."""
 
 import os
+import sqlite3
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from typing import Any, Optional
 import uvicorn
 
@@ -31,6 +32,15 @@ from models import (
     add_change_log,
     get_change_logs,
     dismiss_change_log,
+    create_area,
+    get_area,
+    get_all_areas,
+    update_area,
+    delete_area,
+    set_area_membership,
+    remove_area_membership,
+    get_area_members,
+    get_object_areas,
 )
 from checks import perform_check, detect_changes, get_status_indicator
 
@@ -111,6 +121,28 @@ class DashboardLinkAdd(BaseModel):
 
 class DashboardReorder(BaseModel):
     dashboard_ids: list[str]
+
+
+class AreaCreate(BaseModel):
+    name: str = Field(min_length=1)
+    description: Optional[str] = None
+
+    @field_validator("name", mode="before")
+    @classmethod
+    def strip_name(cls, value):
+        return value.strip() if isinstance(value, str) else value
+
+
+class AreaUpdate(BaseModel):
+    name: Optional[str] = Field(default=None, min_length=1)
+    description: Optional[str] = None
+
+    @field_validator("name", mode="before")
+    @classmethod
+    def validate_name(cls, value):
+        if value is None:
+            raise ValueError("Area name cannot be null")
+        return value.strip() if isinstance(value, str) else value
 
 
 class CheckResponse(BaseModel):
@@ -265,6 +297,105 @@ def remove_link_from_dashboard_endpoint(dashboard_id: str, link_id: str):
     if not remove_link_from_dashboard(dashboard_id, link_id):
         raise HTTPException(status_code=404, detail="Link not on dashboard")
     return {"message": "Link removed from dashboard"}
+
+
+# ============================================================================
+# Areas API
+# ============================================================================
+
+
+@app.post("/api/areas", response_model=dict, status_code=201)
+def create_area_endpoint(area: AreaCreate):
+    return create_area(area.name, area.description)
+
+
+@app.get("/api/areas", response_model=list[dict])
+def get_areas_endpoint():
+    return get_all_areas()
+
+
+@app.get("/api/areas/{area_id}", response_model=dict)
+def get_area_endpoint(area_id: str):
+    area = get_area(area_id)
+    if not area:
+        raise HTTPException(status_code=404, detail="Area not found")
+    return area
+
+
+@app.patch("/api/areas/{area_id}", response_model=dict)
+def update_area_endpoint(area_id: str, area: AreaUpdate):
+    result = update_area(area_id, **area.model_dump(exclude_unset=True))
+    if not result:
+        raise HTTPException(status_code=404, detail="Area not found")
+    return result
+
+
+@app.delete("/api/areas/{area_id}")
+def delete_area_endpoint(area_id: str):
+    if not delete_area(area_id):
+        raise HTTPException(status_code=404, detail="Area not found")
+    return {"message": "Area deleted; links and dashboards were retained"}
+
+
+def _add_area_member(area_id: str, object_id: str, kind: str):
+    try:
+        set_area_membership(area_id, object_id, kind)
+    except sqlite3.IntegrityError:
+        # The insert also checks referential integrity if an entity disappears concurrently.
+        raise HTTPException(status_code=404, detail="Area or member not found")
+    return {"message": "Area membership saved"}
+
+
+def _remove_area_member(area_id: str, object_id: str, kind: str):
+    if not remove_area_membership(area_id, object_id, kind):
+        raise HTTPException(status_code=404, detail="Area membership not found")
+    return {"message": "Area membership removed"}
+
+
+@app.get("/api/areas/{area_id}/links", response_model=list[dict])
+def get_area_links_endpoint(area_id: str):
+    get_area_endpoint(area_id)
+    return get_area_members(area_id, "link")
+
+
+@app.put("/api/areas/{area_id}/links/{link_id}")
+def add_area_link_endpoint(area_id: str, link_id: str):
+    return _add_area_member(area_id, link_id, "link")
+
+
+@app.delete("/api/areas/{area_id}/links/{link_id}")
+def remove_area_link_endpoint(area_id: str, link_id: str):
+    return _remove_area_member(area_id, link_id, "link")
+
+
+@app.get("/api/areas/{area_id}/dashboards", response_model=list[dict])
+def get_area_dashboards_endpoint(area_id: str):
+    get_area_endpoint(area_id)
+    return get_area_members(area_id, "dashboard")
+
+
+@app.put("/api/areas/{area_id}/dashboards/{dashboard_id}")
+def add_area_dashboard_endpoint(area_id: str, dashboard_id: str):
+    return _add_area_member(area_id, dashboard_id, "dashboard")
+
+
+@app.delete("/api/areas/{area_id}/dashboards/{dashboard_id}")
+def remove_area_dashboard_endpoint(area_id: str, dashboard_id: str):
+    return _remove_area_member(area_id, dashboard_id, "dashboard")
+
+
+@app.get("/api/links/{link_id}/areas", response_model=list[dict])
+def get_link_areas_endpoint(link_id: str):
+    if not get_link(link_id):
+        raise HTTPException(status_code=404, detail="Link not found")
+    return get_object_areas(link_id, "link")
+
+
+@app.get("/api/dashboards/{dashboard_id}/areas", response_model=list[dict])
+def get_dashboard_areas_endpoint(dashboard_id: str):
+    if not get_dashboard(dashboard_id):
+        raise HTTPException(status_code=404, detail="Dashboard not found")
+    return get_object_areas(dashboard_id, "dashboard")
 
 
 # ============================================================================

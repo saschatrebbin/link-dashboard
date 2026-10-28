@@ -9,6 +9,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 import json
+import uuid
 
 DEFAULT_DATA_DIR = Path(__file__).parent.parent / "data"
 DB_PATH = Path(
@@ -97,6 +98,37 @@ def init_db():
             FOREIGN KEY (link_id) REFERENCES links(id) ON DELETE CASCADE
         )
     """)
+
+    # Areas are independent filters; neither membership implies the other.
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS areas (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            description TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS area_links (
+            area_id TEXT NOT NULL,
+            link_id TEXT NOT NULL,
+            PRIMARY KEY (area_id, link_id),
+            FOREIGN KEY (area_id) REFERENCES areas(id) ON DELETE CASCADE,
+            FOREIGN KEY (link_id) REFERENCES links(id) ON DELETE CASCADE
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS area_dashboards (
+            area_id TEXT NOT NULL,
+            dashboard_id TEXT NOT NULL,
+            PRIMARY KEY (area_id, dashboard_id),
+            FOREIGN KEY (area_id) REFERENCES areas(id) ON DELETE CASCADE,
+            FOREIGN KEY (dashboard_id) REFERENCES dashboards(id) ON DELETE CASCADE
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_area_links_link ON area_links(link_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_area_dashboards_dashboard ON area_dashboards(dashboard_id)")
 
     # Check results - recent monitoring data (last 30 min)
     cursor.execute("""
@@ -385,6 +417,132 @@ def remove_link_from_dashboard(dashboard_id: str, link_id: str) -> bool:
     deleted = cursor.rowcount > 0
     conn.close()
     return deleted
+
+
+# ============================================================================
+# Area CRUD and independent membership operations
+# ============================================================================
+
+
+def create_area(name: str, description: Optional[str] = None) -> dict:
+    area_id = str(uuid.uuid4())
+    conn = get_db()
+    try:
+        with conn:
+            conn.execute(
+                "INSERT INTO areas (id, name, description) VALUES (?, ?, ?)",
+                (area_id, name, description),
+            )
+        return get_area(area_id)
+    finally:
+        conn.close()
+
+
+def get_area(area_id: str) -> Optional[dict]:
+    conn = get_db()
+    try:
+        row = conn.execute("SELECT * FROM areas WHERE id = ?", (area_id,)).fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+
+def get_all_areas() -> list[dict]:
+    conn = get_db()
+    try:
+        rows = conn.execute("SELECT * FROM areas ORDER BY name COLLATE NOCASE, id").fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        conn.close()
+
+
+def update_area(area_id: str, **kwargs) -> Optional[dict]:
+    updates = {key: value for key, value in kwargs.items() if key in {"name", "description"}}
+    if not updates:
+        return get_area(area_id)
+    updates["updated_at"] = datetime.now().isoformat()
+    fields = ", ".join(f"{key} = ?" for key in updates)
+    conn = get_db()
+    try:
+        with conn:
+            conn.execute(f"UPDATE areas SET {fields} WHERE id = ?", (*updates.values(), area_id))
+        return get_area(area_id)
+    finally:
+        conn.close()
+
+
+def delete_area(area_id: str) -> bool:
+    conn = get_db()
+    try:
+        with conn:
+            cursor = conn.execute("DELETE FROM areas WHERE id = ?", (area_id,))
+        return cursor.rowcount > 0
+    finally:
+        conn.close()
+
+
+def _membership_table(kind: str) -> tuple[str, str, str]:
+    # Identifiers are selected only from this fixed mapping, never user input.
+    return {
+        "link": ("area_links", "link_id", "links"),
+        "dashboard": ("area_dashboards", "dashboard_id", "dashboards"),
+    }[kind]
+
+
+def set_area_membership(area_id: str, object_id: str, kind: str) -> None:
+    """Add a membership idempotently; foreign keys reject nonexistent objects."""
+    table, column, _ = _membership_table(kind)
+    conn = get_db()
+    try:
+        with conn:
+            conn.execute(
+                f"INSERT INTO {table} (area_id, {column}) VALUES (?, ?) ON CONFLICT DO NOTHING",
+                (area_id, object_id),
+            )
+    finally:
+        conn.close()
+
+
+def remove_area_membership(area_id: str, object_id: str, kind: str) -> bool:
+    table, column, _ = _membership_table(kind)
+    conn = get_db()
+    try:
+        with conn:
+            cursor = conn.execute(
+                f"DELETE FROM {table} WHERE area_id = ? AND {column} = ?",
+                (area_id, object_id),
+            )
+        return cursor.rowcount > 0
+    finally:
+        conn.close()
+
+
+def get_area_members(area_id: str, kind: str) -> list[dict]:
+    table, column, object_table = _membership_table(kind)
+    conn = get_db()
+    try:
+        rows = conn.execute(
+            f"SELECT o.* FROM {object_table} o JOIN {table} m ON o.id = m.{column} "
+            "WHERE m.area_id = ? ORDER BY o.id",
+            (area_id,),
+        ).fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        conn.close()
+
+
+def get_object_areas(object_id: str, kind: str) -> list[dict]:
+    table, column, _ = _membership_table(kind)
+    conn = get_db()
+    try:
+        rows = conn.execute(
+            f"SELECT a.* FROM areas a JOIN {table} m ON a.id = m.area_id "
+            f"WHERE m.{column} = ? ORDER BY a.name COLLATE NOCASE, a.id",
+            (object_id,),
+        ).fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        conn.close()
 
 
 # ============================================================================
