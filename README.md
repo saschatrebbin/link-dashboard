@@ -65,6 +65,12 @@ Syntax check:
 ./scripts/manage.sh check
 ```
 
+Run the backend integration tests after installing `backend/requirements.txt`:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
 The container uses a bind mount for persistent data:
 
 ```text
